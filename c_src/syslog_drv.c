@@ -91,9 +91,6 @@ static void syslogdrv_output(ErlDrvData handle, char *buf, ErlDrvSizeT len)
     if (d->open && len > 4) {
         int priority = ntohl(*(uint32_t*)buf);
         buf += 4;
-        /* re-call openlog in case another instance of the port driver
-         * was called in the mean time */
-        openlog(d->ident, d->logopt, d->facility);
         syslog(priority, "%s", buf);
     }
 }
@@ -141,6 +138,7 @@ static ErlDrvSSizeT syslogdrv_control(ErlDrvData handle, unsigned int command,
         d->logopt = (int)logopt;
         d->facility = (int)facility;
         d->open = 1;
+        openlog(d->ident, d->logopt, d->facility);
         return 0;
     } else {
         return (ErlDrvSSizeT)ERL_DRV_ERROR_BADARG;
